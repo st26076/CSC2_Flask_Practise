@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Norican&display=swap');
+
+body {
+    background-color: lightpink;
+    margin: 40px;
+}
+
+h1 {
+    font-family: "Pacifico", cursive;
+    font-weight: lighter;
+    text-align: center;
+    font-size: 50px;
+}
+
+nav {
+    background-color: rgb(226, 146, 158);
+}
+
+nav, li {
+    display: flex;
+    font-family: "Norican", cursive;
+    font-size: 20px;
+    text-align: center;
+    justify-content: space-between;
+    margin: 20px;
+    padding: 20px;
+}
+
+a {
+    color: rgb(65, 12, 20);
+    font-size: 20px;
+}
+
+a:hover {
+    color: rgb(155, 23, 43);
+    font-size: 25px;
+}
+
+h2 {  
+    font-family: "Norican", cursive;
+    font-size: xx-large;
+}
+
+ul{
+    list-style-type: circle;
+}
+
+li {
+    text-align: left;
+    margin: 0px;
+    padding: 0px;
+    display: normal;
+    justify-content: left;
+}
+
+.layout {
+    display: flex;
+    align-items: center;
+    gap: 150px;
+}
+
+h4 {
+    text-decoration: underline;
+}
