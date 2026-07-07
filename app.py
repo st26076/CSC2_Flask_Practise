@@ -9,8 +9,8 @@ def index():
     flowers, addons = load_data()
     selected_addons = session.get('selected_addons', {})
     cart = session.get('cart', {})
-    total = calculate_total(cart)
-    return render_template('index.html', flowers=flowers, addons=addons, cart=cart, total=total, selected_addons=selected_addons)
+    total, flower_subtotal, addon_subtotal = calculate_total(cart, selected_addons)
+    return render_template('index.html', flowers=flowers, addons=addons, cart=cart, total=total, selected_addons=selected_addons, flower_subtotal=flower_subtotal, addon_subtotal=addon_subtotal)
 
 def load_data():
     with open('data/flowers.json') as file:
@@ -22,9 +22,8 @@ def load_data():
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
     flower = request.form['flower']
-    addon = request.form['addon']
     quantity = int(request.form['quantity'])
-    flowers, addons = load_data()
+    flowers,_ = load_data()
     cart = session.get('cart', {})
 
     if flower not in flowers:
@@ -60,22 +59,6 @@ def remove_from_cart(item):
 
     return redirect(url_for('index'))
 
-def calculate_total(cart):
-    total = sum (item['price'] * item['quantity'] for item in cart.values())
-    return total
-
-@app.route('/about')
-def about():
-    return render_template('about.html')
-
-@app.route('/order_history')
-def order_history():
-    return render_template('order_history.html')
-
-@app.route('/invoices')
-def invoices():
-    return render_template('invoices.html')
-
 @app.route('/select_addon', methods=['POST'])
 def select_addon():
     selected_addons = {}
@@ -85,8 +68,9 @@ def select_addon():
 
     for addon in selected_keys:
         if addon in addons:
-            selected_addons[addon] = float(addons[addon]['price'])
-
+            selected_addons[addon] = {
+                'price': addons[addon]['price']
+            }
     if not selected_keys:
         flash("Invalid addon selected.")
         return redirect(url_for('index'))
@@ -102,6 +86,32 @@ def select_addon():
     session.modified = True
     flash(f"{addon}(s) added to cart.")
     return redirect(url_for('index'))
+
+def flower_subtotal(cart):
+    total = sum (item['price'] * item['quantity'] for item in cart.values())
+    return total
+
+def addon_subtotal(selected_addons):
+    total = sum (item['price'] for item in selected_addons.values())
+    return total
+
+def calculate_total(cart, selected_addons):
+    flower_subtotal = sum (item['price'] * item['quantity'] for item in cart.values())
+    addon_subtotal = sum (item['price'] for item in selected_addons.values())
+    total = flower_subtotal + addon_subtotal
+    return total, flower_subtotal, addon_subtotal
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/order_history')
+def order_history():
+    return render_template('order_history.html')
+
+@app.route('/invoices')
+def invoices():
+    return render_template('invoices.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
