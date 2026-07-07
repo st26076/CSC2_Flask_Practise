@@ -2,5 +2,7 @@
     "Sparkles":{"price":7},
     "Bow":{"price":4},
     "Ribbon":{"price":3},
-    "Personalized Name":{"price":3}
+    "Personalized Name":{"price":3},
+    "Chocolate":{"price":8},
+    "Delivery":{"price":10}
 }
