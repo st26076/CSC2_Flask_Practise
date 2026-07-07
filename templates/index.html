@@ -63,11 +63,13 @@
                     </li>
                 {% endfor %}
             </ul>
+            <li class="subtotal">Subtotal: ${{ '%.2f' % flower_subtotal }}</li>
             <ul>
                 {% for item, details in selected_addons.items() %}
                     <li>{{ item }}: ${{ details ['price'] }}</li>
                 {% endfor %}
             </ul>
+            <li class="subtotal">Subtotal: ${{ '%.2f' % addon_subtotal }}</li>
         {% else %}
             <p>Your cart is empty</p>
         {% endif %}
