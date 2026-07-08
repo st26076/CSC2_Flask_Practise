@@ -67,3 +67,15 @@ li {
 h4 {
     text-decoration: underline;
 }
+
+button {
+    background-color: rgb(251, 196, 204);
+    padding: 5px;
+}
+
+button:hover {
+    transition: ease-out;
+    transition-duration: 0.25s;
+    background-color: rgb(255, 156, 171);
+    padding: 10px;
+}
