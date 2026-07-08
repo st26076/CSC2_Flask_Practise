@@ -101,6 +101,14 @@ def calculate_total(cart, selected_addons):
     total = flower_subtotal + addon_subtotal
     return total, flower_subtotal, addon_subtotal
 
+@app.route('/cancel_order', methods=['POST'])
+def cancel_order():
+    session.pop('cart', None)
+    session.pop('selected_addons', None)
+    session.modified = True
+    flash("Order cancelled. Your cart has been emptied")
+    return redirect(url_for('index'))
+
 @app.route('/about')
 def about():
     return render_template('about.html')
