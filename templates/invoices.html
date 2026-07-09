@@ -4,6 +4,31 @@
 
 {% block content %}
     <body>
-        <p>This page will show the customer invoice after checkout.</p>
+        <h1 class="invoice">Invoice:</h1>
+        <p class="invoice">Invoice Number: {{ invoice_number }}</p>
+        <p class="invoice">Customer Name: {{ customer_name }}</p>
+        <p class="invoice">Date: {{ invoice_date }}</p>
+        <h2 class="invoice">Flowers:</h2>
+        <ul>
+            {% for item, details in cart.items() %}
+                <li class="invoice">
+                    {{ item }}:
+                    {{ details['quantity'] }} x
+                    ${{ '%.2f' % details['price'] }}
+                    = ${{ '%.2f' % (details['quantity'] * details['price']) }}
+                </li>
+            {% endfor %}        
+        </ul>
+        <h2 class="invoice">Addons:</h2>
+        <ul>
+            {% for item, details in selected_addons.items() %}
+                <li class="invoice"> {{ item }}: ${{ '%.2f' % details['price'] }} </li>
+            {% endfor %}        
+        </ul>
+        <h2 class="invoice">Total:</h2>
+        <p class="invoice">${{ '%.2f' % total }}</p>
+        <p class="invoice">Thank you for shopping at Online Flower Shop!</p>
+        <a class="invoice" href="{{ url_for('index') }}">Click here to continue shopping</a>
+
     </body>
 {% endblock %}
