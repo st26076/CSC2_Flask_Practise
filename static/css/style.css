@@ -79,3 +79,24 @@ button:hover {
     background-color: rgb(255, 156, 171);
     padding: 10px;
 }
+
+
+.invoice {
+    text-align: left;
+}
+
+.invoice h1 {
+    font-size: 30px;
+}
+
+.invoice h2 {
+    font-size: 20px;
+}
+
+.invoice a {
+    color: rgb(213, 83, 105);
+}
+
+.invoice a:hover {
+    color: rgb(170, 52, 72)
+}
