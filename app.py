@@ -1,4 +1,5 @@
 import json
+import datetime
 from flask import Flask, render_template, request, session, flash, redirect, url_for
 
 app = Flask(__name__)
@@ -100,6 +101,26 @@ def calculate_total(cart, selected_addons):
     addon_subtotal = sum (item['price'] for item in selected_addons.values())
     total = flower_subtotal + addon_subtotal
     return total, flower_subtotal, addon_subtotal
+
+@app.route('/checkout', methods=['POST'])
+def checkout():
+    customer_name = request.form['customer_name'].strip().title()
+    if not customer_name:
+        flash("Customer name is required.")
+        return redirect(url_for('index'))
+
+    cart = session.get('cart', {})
+    selected_addons = session.get('selected_addons', {})    
+    if not cart:
+        flash("Your cart is empty.")
+        return redirect(url_for('index'))
+    
+    total, flower_subtotal, addon_subtotal = calculate_total(cart, selected_addons)    
+    invoice_date = datetime.datetime.now().strftime('%Y-%m-%d %H:M:%S')
+    invoice_number = f"INV_{customer_name.replace(' ', '_')}_{invoice_date}"
+
+    return render_template('invoices.html', customer_name=customer_name, total=total, invoice_date=invoice_date, invoice_number=invoice_number, cart=cart, selected_addons=selected_addons, flower_subtotal=flower_subtotal, addon_subtotal=addon_subtotal)
+
 
 @app.route('/cancel_order', methods=['POST'])
 def cancel_order():
