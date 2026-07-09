@@ -77,6 +77,9 @@
 
         <h4>Total: ${{ '%.2f' % total }}</h4>
         <form action="{{ url_for('cancel_order') }}" method="post">
+            <label for="customer_name_checkout">Your Name:</label>
+            <input type="text" name="customer_name" id="customer_name_checkout" required>
+            <button type="submit" formaction="{{ url_for('checkout') }}">Checkout</button>
             <button type="submit" formaction="{{ url_for('cancel_order') }}" onclick="return confirm('Are you sure you want to cancel your order?')">Cancel Order</button>
         </form>
     </body>
