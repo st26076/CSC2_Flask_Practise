@@ -1,9 +1,25 @@
 import json
 import datetime
+import sqlite3
 from flask import Flask, render_template, request, session, flash, redirect, url_for
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
+
+def initialise_database():
+    with sqlite3.connect('flower_shop.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+                       CREATE TABLE IF NOT EXISTS orders (
+                       order_id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                       invoice_number TEXT,
+                       customer_name TEXT, 
+                       items TEXT, 
+                       addons TEXT, 
+                       total REAL, 
+                       date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                       )
+                       ''')
 
 @app.route('/')
 def index():
@@ -119,6 +135,13 @@ def checkout():
     invoice_date = datetime.datetime.now().strftime('%Y-%m-%d %H:M:%S')
     invoice_number = f"INV_{customer_name.replace(' ', '_')}_{invoice_date}"
 
+    with sqlite3.connect('flower_shop.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                           INSERT INTO orders (invoice_number, customer_name, items, addons, total)
+                           VALUES (?, ?, ?, ?, ?)
+                           ''', (invoice_number, customer_name, json.dumps(cart), json.dumps(selected_addons), total))
+            conn.commit()
     return render_template('invoices.html', customer_name=customer_name, total=total, invoice_date=invoice_date, invoice_number=invoice_number, cart=cart, selected_addons=selected_addons, flower_subtotal=flower_subtotal, addon_subtotal=addon_subtotal)
 
 
@@ -143,4 +166,5 @@ def invoices():
     return render_template('invoices.html')
 
 if __name__ == '__main__':
+    initialise_database()
     app.run(debug=True)
