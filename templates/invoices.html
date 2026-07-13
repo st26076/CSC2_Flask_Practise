@@ -25,6 +25,9 @@
                 <li class="invoice"> {{ item }}: ${{ '%.2f' % details['price'] }} </li>
             {% endfor %}        
         </ul>
+        <h2>Summary:</h2>
+        <p class="invoice">Subtotal: {{ '%.2f' % original_total }}</p>
+        <p class="invoice">10% Discount applied</p>
         <h2 class="invoice">Total:</h2>
         <p class="invoice">${{ '%.2f' % total }}</p>
         <p class="invoice">Thank you for shopping at Online Flower Shop!</p>
