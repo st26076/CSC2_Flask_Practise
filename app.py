@@ -26,8 +26,8 @@ def index():
     flowers, addons = load_data()
     selected_addons = session.get('selected_addons', {})
     cart = session.get('cart', {})
-    total, flower_subtotal, addon_subtotal = calculate_total(cart, selected_addons)
-    return render_template('index.html', flowers=flowers, addons=addons, cart=cart, total=total, selected_addons=selected_addons, flower_subtotal=flower_subtotal, addon_subtotal=addon_subtotal)
+    total, discount_applied, flower_subtotal, addon_subtotal, original_total = calculate_total(cart, selected_addons)
+    return render_template('index.html', flowers=flowers, addons=addons, cart=cart, total=total, selected_addons=selected_addons, flower_subtotal=flower_subtotal, addon_subtotal=addon_subtotal, discount_applied=discount_applied, original_total=original_total)
 
 def load_data():
     with open('data/flowers.json') as file:
@@ -113,10 +113,15 @@ def addon_subtotal(selected_addons):
     return total
 
 def calculate_total(cart, selected_addons):
-    flower_subtotal = sum (item['price'] * item['quantity'] for item in cart.values())
-    addon_subtotal = sum (item['price'] for item in selected_addons.values())
-    total = flower_subtotal + addon_subtotal
-    return total, flower_subtotal, addon_subtotal
+    flower_subtotal = sum(item['price'] * item['quantity'] for item in cart.values())
+    addon_subtotal = sum(item['price'] for item in selected_addons.values())
+    original_total = flower_subtotal + addon_subtotal
+    total = original_total
+    discount_applied = False
+    if total > 180:
+        total = total * 0.9
+        discount_applied = True
+    return total, discount_applied, flower_subtotal, addon_subtotal, original_total
 
 @app.route('/checkout', methods=['POST'])
 def checkout():
@@ -131,8 +136,8 @@ def checkout():
         flash("Your cart is empty.")
         return redirect(url_for('index'))
     
-    total, flower_subtotal, addon_subtotal = calculate_total(cart, selected_addons)    
-    invoice_date = datetime.datetime.now().strftime('%Y-%m-%d %H:M:%S')
+    total, discount_applied, flower_subtotal, addon_subtotal, original_total = calculate_total(cart, selected_addons)    
+    invoice_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     invoice_number = f"INV_{customer_name.replace(' ', '_')}_{invoice_date}"
 
     with sqlite3.connect('flower_shop.db') as conn:
@@ -142,7 +147,38 @@ def checkout():
                            VALUES (?, ?, ?, ?, ?)
                            ''', (invoice_number, customer_name, json.dumps(cart), json.dumps(selected_addons), total))
             conn.commit()
-    return render_template('invoices.html', customer_name=customer_name, total=total, invoice_date=invoice_date, invoice_number=invoice_number, cart=cart, selected_addons=selected_addons, flower_subtotal=flower_subtotal, addon_subtotal=addon_subtotal)
+
+
+    invoice_filename = f"{invoice_number.replace(':', '-')}.txt"    
+    with open(invoice_filename, 'w') as f:
+        f.write("----- Flower Shop Invoice -----\n\n")
+        f.write(f"Invoice Number: {invoice_number}\n")
+        f.write(f"Customer Name: {customer_name}\n")
+        f.write(f"Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+        f.write("Items:\n")
+        for item, details in cart.items():
+            f.write(f"-{item}: {details['quantity']} x ${details['quantity'] * details['price']:.2f}\n")
+        if selected_addons:
+            f.write("\nAdd-Ons:\n")
+            for addon, price in selected_addons.items():
+                f.write(f"-{addon}: ${details['price']:.2f}\n")
+        f.write(f"\nTotal: ${total:.2f}\n")
+
+    with open('data/flowers.json', 'r') as file:
+        flower_data = json.load(file)
+
+    for flower_name, details in cart.items():
+        if flower_name in flower_data:
+            flower_data[flower_name]['stock'] -= details['quantity']
+            if flower_data[flower_name]['stock'] < 0:
+                flower_data[flower_name]['stock'] = 0 
+
+    with open('data/flowers.json', 'w') as file:
+        json.dump(flower_data, file, indent=4)
+    session.pop('cart', None)
+    session.pop('selected_addons', None)
+    session.modified = True
+    return render_template('invoices.html', customer_name=customer_name, total=total, invoice_date=invoice_date, invoice_number=invoice_number, cart=cart, selected_addons=selected_addons, flower_subtotal=flower_subtotal, addon_subtotal=addon_subtotal, invoice_filename=invoice_filename, discount_applied=discount_applied, original_total=original_total)
 
 
 @app.route('/cancel_order', methods=['POST'])
