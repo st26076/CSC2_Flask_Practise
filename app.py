@@ -195,7 +195,23 @@ def about():
 
 @app.route('/order_history')
 def order_history():
-    return render_template('order_history.html')
+    with sqlite3.connect('flower_shop.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM orders ORDER BY date DESC")
+        rows = cursor.fetchall()
+        orders = []
+        for row in rows:
+            orders.append ({'order_id': row[0],'invoice_number': row[1], 'customer_name': row [2],'items': json.loads(row[3]),'addons': json.loads(row[4]),'total': row[5], 'date': row[6] })
+    return render_template('order_history.html', orders=orders)
+
+@app.route('/cancel_saved_order/<int:order_id>', methods=['POST'])
+def cancel_saved_order(order_id):
+    with sqlite3.connect('flower_shop.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM orders WHERE order_id = ?", (order_id,))
+        conn.commit()
+    flash("Order Cancelled.")
+    return redirect(url_for('order_history'))
 
 @app.route('/invoices')
 def invoices():
