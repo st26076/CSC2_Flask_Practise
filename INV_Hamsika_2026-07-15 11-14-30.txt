@@ -1,0 +1,15 @@
+----- Flower Shop Invoice -----
+
+Invoice Number: INV_Hamsika_2026-07-15 11:14:30
+Customer Name: Hamsika
+Date: 2026-07-15 11:14:30
+
+Items:
+-Rose: 10 x $110.00
+
+Add-Ons:
+-Bow: $11.00
+-Chocolate: $11.00
+-Personalized Name: $11.00
+
+Total: $125.00
