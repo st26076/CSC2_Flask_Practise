@@ -30,11 +30,16 @@ def index():
     return render_template('index.html', flowers=flowers, addons=addons, cart=cart, total=total, selected_addons=selected_addons, flower_subtotal=flower_subtotal, addon_subtotal=addon_subtotal, discount_applied=discount_applied, original_total=original_total)
 
 def load_data():
-    with open('data/flowers.json') as file:
-        flowers = json.load(file)
-    with open('data/addons.json') as file:
-        addons = json.load(file)
-    return flowers, addons
+    try:
+        with open('data/flowers.json') as file:
+            flowers = json.load(file)
+        with open('data/addons.json') as file:
+            addons = json.load(file)
+        return flowers, addons
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Error loading data: {e}")
+        return {}, {}
+
 
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
@@ -149,35 +154,40 @@ def checkout():
             conn.commit()
 
 
-    invoice_filename = f"{invoice_number.replace(':', '-')}.txt"    
-    with open(invoice_filename, 'w') as f:
-        f.write("----- Flower Shop Invoice -----\n\n")
-        f.write(f"Invoice Number: {invoice_number}\n")
-        f.write(f"Customer Name: {customer_name}\n")
-        f.write(f"Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
-        f.write("Items:\n")
-        for item, details in cart.items():
-            f.write(f"-{item}: {details['quantity']} x ${details['quantity'] * details['price']:.2f}\n")
-        if selected_addons:
-            f.write("\nAdd-Ons:\n")
-            for addon, price in selected_addons.items():
-                f.write(f"-{addon}: ${details['price']:.2f}\n")
-        f.write(f"\nTotal: ${total:.2f}\n")
+    invoice_filename = f"{invoice_number.replace(':', '-')}.txt"   
+    try: 
+        with open(invoice_filename, 'w') as f:
+            f.write("----- Flower Shop Invoice -----\n\n")
+            f.write(f"Invoice Number: {invoice_number}\n")
+            f.write(f"Customer Name: {customer_name}\n")
+            f.write(f"Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+            f.write("Items:\n")
+            for item, details in cart.items():
+                f.write(f"-{item}: {details['quantity']} x ${details['quantity'] * details['price']:.2f}\n")
+            if selected_addons:
+                f.write("\nAdd-Ons:\n")
+                for addon, details in selected_addons.items():
+                    f.write(f"-{addon}: ${details['price']:.2f}\n")
+            f.write(f"\nTotal: ${total:.2f}\n")
 
-    with open('data/flowers.json', 'r') as file:
-        flower_data = json.load(file)
+        with open('data/flowers.json', 'r') as file:
+            flower_data = json.load(file)
+        for flower_name, details in cart.items():
+            if flower_name in flower_data:
+                flower_data[flower_name]['stock'] -= details['quantity']
+                if flower_data[flower_name]['stock'] < 0:
+                    flower_data[flower_name]['stock'] = 0 
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Error writing invoice: {e}")
 
-    for flower_name, details in cart.items():
-        if flower_name in flower_data:
-            flower_data[flower_name]['stock'] -= details['quantity']
-            if flower_data[flower_name]['stock'] < 0:
-                flower_data[flower_name]['stock'] = 0 
-
-    with open('data/flowers.json', 'w') as file:
-        json.dump(flower_data, file, indent=4)
-    session.pop('cart', None)
-    session.pop('selected_addons', None)
-    session.modified = True
+    try:
+        with open('data/flowers.json', 'w') as file:
+            json.dump(flower_data, file, indent=4)
+        session.pop('cart', None)
+        session.pop('selected_addons', None)
+        session.modified = True
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Could not update stock file: {e}")
     return render_template('invoices.html', customer_name=customer_name, total=total, invoice_date=invoice_date, invoice_number=invoice_number, cart=cart, selected_addons=selected_addons, flower_subtotal=flower_subtotal, addon_subtotal=addon_subtotal, invoice_filename=invoice_filename, discount_applied=discount_applied, original_total=original_total)
 
 
