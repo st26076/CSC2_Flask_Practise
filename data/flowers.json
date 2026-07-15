@@ -1,7 +1,7 @@
 {
     "Rose": {
         "price": 11,
-        "stock": 32
+        "stock": 31
     },
     "Tulip": {
         "price": 8,
@@ -9,7 +9,7 @@
     },
     "Lily": {
         "price": 10,
-        "stock": 32
+        "stock": 30
     },
     "Daisy": {
         "price": 9,
@@ -17,10 +17,10 @@
     },
     "Orchid": {
         "price": 12,
-        "stock": 29
+        "stock": 25
     },
     "Hibiscus": {
         "price": 22,
-        "stock": 34
+        "stock": 30
     }
 }

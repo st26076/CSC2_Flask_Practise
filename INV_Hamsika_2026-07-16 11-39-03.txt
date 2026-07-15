@@ -1,0 +1,21 @@
+----- Flower Shop Invoice -----
+
+Invoice Number: INV_Hamsika_2026-07-16 11:39:03
+Customer Name: Hamsika
+Date: 2026-07-16 11:39:03
+
+Items:
+-Hibiscus: 4 x $88.00
+-Lily: 2 x $20.00
+-Orchid: 4 x $48.00
+-Rose: 1 x $11.00
+
+Add-Ons:
+-Bow: $4.00
+-Chocolate: $8.00
+-Delivery: $10.00
+-Personalized Name: $3.00
+-Ribbon: $3.00
+-Sparkles: $7.00
+
+Total: $181.80
