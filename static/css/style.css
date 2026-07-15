@@ -35,6 +35,8 @@ a {
 a:hover {
     color: rgb(155, 23, 43);
     font-size: 25px;
+    transition: ease-out;
+    transition-duration: 0.25s;
 }
 
 h2 {  
@@ -71,6 +73,8 @@ h4 {
 button {
     background-color: rgb(251, 196, 204);
     padding: 5px;
+    margin: 10px;
+    margin-top: 20px;
 }
 
 button:hover {
